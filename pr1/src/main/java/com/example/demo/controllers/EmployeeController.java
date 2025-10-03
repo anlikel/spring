@@ -51,5 +51,14 @@ public class EmployeeController {
         return ResponseEntity.ok(new2);
     }
 
+    @DeleteMapping("user/{id}")
+    public ResponseEntity<Void> addUser
+            (
+                    @PathVariable Long id)
+    {
+        employeeRepository.deleteById(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
 }
