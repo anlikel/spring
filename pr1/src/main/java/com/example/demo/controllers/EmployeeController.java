@@ -7,6 +7,7 @@ import com.example.demo.repositores.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,17 +53,16 @@ public class EmployeeController {
     }
 
     @PostMapping("user/{id}")
-    public ResponseEntity<Employee> addUser
+    public ResponseEntity<?> addUser
             (
              @RequestBody Employee employee)
     {
-        Employee e=new Employee(employee.getName(), employee.getRole());
-        Employee e2=employeeRepository.save(e);
-        return ResponseEntity.status(HttpStatus.CREATED).body(e2);
+        EntityModel<Employee>e=employeeModelAssembler.toModel(employeeRepository.save(employee));
+        return ResponseEntity.created(e.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(e);
     }
 
     @PutMapping("user/{id}")
-    public ResponseEntity<Employee> updateUser(
+    public ResponseEntity<?> updateUser(
             @PathVariable Long id,
             @RequestBody Employee employee){
         Employee old;
@@ -71,17 +71,20 @@ public class EmployeeController {
         old.setName(employee.getName());
         old.setRole(employee.getRole());
         Employee new2=employeeRepository.save(old);
-        return ResponseEntity.ok(new2);
+
+        EntityModel<Employee>e=employeeModelAssembler.toModel(new2);
+        return ResponseEntity.created(e.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(e);
     }
 
     @DeleteMapping("user/{id}")
-    public ResponseEntity<Void> addUser
+    public ResponseEntity<String> deleteUser
             (
                     @PathVariable Long id)
     {
         employeeRepository.deleteById(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+//        return ResponseEntity.ok().body("deleted");
+        return ResponseEntity.noContent().build();
     }
 
 }

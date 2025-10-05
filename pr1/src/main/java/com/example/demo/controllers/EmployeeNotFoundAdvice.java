@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import com.example.demo.exceptions.NotFoundEmployeeException;
+import com.example.demo.exceptions.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -12,6 +13,12 @@ public class EmployeeNotFoundAdvice {
     @ExceptionHandler(NotFoundEmployeeException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String employeeNotFoundHandler(NotFoundEmployeeException e){
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String orderNotFoundHandler(OrderNotFoundException e){
         return e.getMessage();
     }
 }
