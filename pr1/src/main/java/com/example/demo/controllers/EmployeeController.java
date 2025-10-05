@@ -1,9 +1,11 @@
 package com.example.demo.controllers;
 
 import com.example.demo.classes.Employee;
+import com.example.demo.classes.EmployeeModelAssembler;
 import com.example.demo.exceptions.NotFoundEmployeeException;
 import com.example.demo.repositores.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -19,8 +22,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeModelAssembler employeeModelAssembler;
 
+    public EmployeeController(EmployeeRepository employeeRepository,EmployeeModelAssembler employeeModelAssembler){
+        this.employeeRepository=employeeRepository;
+        this.employeeModelAssembler=employeeModelAssembler;
+    }
 //    @GetMapping("user/{id}")
 //    public Employee getUserById(@PathVariable Long id){
 //    return employeeRepository.findById(id).
@@ -28,20 +36,20 @@ public class EmployeeController {
 //    }
 
     @GetMapping("/user/{id}")
-    EntityModel<Employee> one(@PathVariable Long id) {
+    public EntityModel<Employee> one(@PathVariable Long id) {
 
         Employee employee = employeeRepository.findById(id) //
                 .orElseThrow(() -> new NotFoundEmployeeException(id));
 
-        return EntityModel.of(employee, //
-                linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel());
-//                linkTo(methodOn(EmployeeController.class).all()).withRel("users"));
+        return employeeModelAssembler.toModel(employee);
     }
 
-//    @GetMapping("users")
-//    public List<Employee> getAllUsers(){
-//        return employeeRepository.findAll();
-//    }
+    @GetMapping("users")
+    public CollectionModel<EntityModel<Employee>> all(){
+        List<EntityModel<Employee>>list=employeeRepository.findAll().stream()
+                .map(employeeModelAssembler::toModel).collect(Collectors.toList());
+        return CollectionModel.of(list,linkTo(methodOn(EmployeeController.class).all()).withSelfRel());
+    }
 
     @PostMapping("user/{id}")
     public ResponseEntity<Employee> addUser
