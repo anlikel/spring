@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SpringBootApplication
-public class App implements CommandLineRunner {
+public class App{
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
@@ -22,24 +22,4 @@ public class App implements CommandLineRunner {
     }
 
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Override
-    public void run(String... args) throws Exception {
-        log.info("creating tables");
-        jdbcTemplate.execute("DROP TABLE customers IF EXISTS");
-        jdbcTemplate.execute("CREATE TABLE customers(" +
-                "id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(255), last_name VARCHAR(255))");
-
-        List<Object[]> splitUpNames = Arrays.asList("John Woo", "Jeff Dean", "Josh Bloch", "Josh Long").stream()
-                .map(name -> name.split(" "))
-                .collect(Collectors.toList());
-
-        jdbcTemplate.batchUpdate("INSERT INTO customers(first_name, last_name) VALUES (?,?)", splitUpNames);
-//        jdbcTemplate.query(
-//                        "SELECT id, first_name, last_name FROM customers WHERE first_name = ?",
-//                        (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")), "Josh")
-//                .forEach(customer -> log.info(customer.toString()));
-    }
 }
