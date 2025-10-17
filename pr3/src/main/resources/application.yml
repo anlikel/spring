@@ -5,6 +5,12 @@ spring:
     username: admin
     password: test
 
+  ldap:
+    embedded:
+      ldif: classpath:test-server.ldif
+      base-dn: dc=springframework,dc=org
+      port: 8389
+
   web:
     resources:
       add-mappings: true
